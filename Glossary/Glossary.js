@@ -29,8 +29,6 @@ var showMeaning = function(event) {
 
 
 $(document).ready(function(){
-	
-	
 	$("a.word-meaning").hover(function(event){
 		showMeaning(event);
 	});

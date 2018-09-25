@@ -23,6 +23,12 @@ var showMeaning = function(event) {
 	
 	if(meaning != undefined && meaning !== "") {
 		$(event.target).attr("data-content",meaning);
+		// handle popup if the element is on the extreme right
+		// without this, the popup shows up, further on the right - cut out
+		var rightOffset = ($(window).width() - ($(event.target).offset().left + $(event.target).outerWidth()));
+		if(rightOffset < 80){
+			$(event.target).attr("data-placement","left");
+		}
 		$(event.target).popover("show");
 	}
 }

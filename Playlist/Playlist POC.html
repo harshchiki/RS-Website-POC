@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<style>
+		#divMediaPlayer {
+			width:50%;
+		}
+	</style>
+
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="js/customplaylist.js"></script>
+</head>
+<body>
+
+<h1> Audios </h1>
+
+<table class="table" style="width:60%;">
+	<tr>
+		<td>
+			2018-08-24 Bhajanghar
+		</td>
+		<td>
+			<button class="addToPlaylist btn-success" audioPath = "Audio/2018-08-24 Bhajanghar.mp3">Add to Playlist </button>
+			<button class="removeFromPlaylist btn-danger" audioPath = "Audio/2018-08-24 Bhajanghar.mp3">Remove from Playlist </button>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			2018-08-24 Gurudwara PanniGali 4 PM
+		</td>
+		<td>
+			<button class="addToPlaylist btn-success" audioPath = "Audio/2018-08-24 Gurudwara PanniGali 4 PM.mp3">Add to Playlist </button>
+			<button class="removeFromPlaylist btn-danger" audioPath = "Audio/2018-08-24 Gurudwara PanniGali 4 PM.mp3">Remove from  Playlist </button>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			2018-08-24 Gurudwara PanniGali PM
+		</td>
+		<td>
+			<button class="addToPlaylist btn-success" audioPath = "Audio/2018-08-24 Gurudwara PanniGali PM.mp3">Add to Playlist </button>
+			<button class="removeFromPlaylist btn-danger" audioPath = "Audio/2018-08-24 Gurudwara PanniGali PM.mp3">Remove from Playlist </button>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			Bachan Aakhiri Soamiji Maharaj
+		</td>
+		<td>
+			<button class="addToPlaylist btn-success" audioPath = "Audio/Bachan Aakhiri Soamiji Maharaj.mp3">Add to Playlist </button>
+			<button class="removeFromPlaylist btn-danger" audioPath = "Audio/Bachan Aakhiri Soamiji Maharaj.mp3">Remove from Playlist </button>
+		</td>
+	</tr>
+</table>
+
+
+<br/>
+
+<div id="divMediaPlayer" style="display:none;" class="border">
+	<h2>Playlist</h2>
+	<marquee id="mediaPlayerMarquee"></marquee>
+	<audio controls id="audioMediaPlayer">
+	</audio>
+	<button id="nextAnchor" class="btn">Next</button>
+	&nbsp;&nbsp;
+	<button id="prevAnchor" class="btn">Previous</button>
+	<br/>
+
+
+	<ul class="list-group" id="lstPlaylist">
+	  
+	</ul>
+</div>
+
+
+</body>
+</html>

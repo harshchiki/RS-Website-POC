@@ -1,0 +1,8 @@
+#divMediaPlayer {
+	width:50%;
+	max-height:30%;
+}
+
+li.playlist.not(.active):hover {
+	background-color:#F3F3F3;
+}

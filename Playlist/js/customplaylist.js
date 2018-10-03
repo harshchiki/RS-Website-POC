@@ -1,6 +1,6 @@
 var selectedAudio = [];
 
-var currentIndex = 0;
+var currentIndex = -1;
 
 // add to playlist
 var addToPlaylist = function(path) {
@@ -9,9 +9,13 @@ var addToPlaylist = function(path) {
 
 		// after inserting first element
 		if(selectedAudio.length == 1){
+			if(currentIndex == -1){
+				currentIndex = 0;
+			}
 			var mediaHtml = "<source src=\""+ selectedAudio[currentIndex] + "\" type = \"audio/mp3\"> Your browser does not support the audio element.";
 
 			$("#audioMediaPlayer").html(mediaHtml);
+
 			play();
 		}
 	}
@@ -23,75 +27,134 @@ var addToPlaylist = function(path) {
 var play = function(){
 	var audio = selectedAudio[currentIndex].split("/")[1];
 	$("#mediaPlayerMarquee").html("Playing: " + audio);
+
+	var mediaHtml = "<source src=\""+ selectedAudio[currentIndex] + "\" type = \"audio/mp3\"> Your browser does not support the audio element.";
+
+			
+	$("#audioMediaPlayer").html(mediaHtml);
+	$("#audioMediaPlayer")[0].pause();
 	$("#audioMediaPlayer")[0].load();
 	$("#audioMediaPlayer")[0].play();
+
+	plotPlaylistList();
 };
 
 // remove from playlist
-var removeFromPlaylist = function(path) {
+ var removeFromPlaylist = function(path){
+ 	var indexToBeDeleted = -1;
 
-	var indexOfPath = -1;
+ 	$(selectedAudio).each(function(i,e){
+ 		if(e === path){
+ 			indexToBeDeleted = i;
+ 		}
+ 	});
 
-	$(selectedAudio).each(function(index, element){
-		if(element === path){
-			indexOfPath = index;
+ 	// case 1
+ 	if(indexToBeDeleted > currentIndex){
+ 		if(selectedAudio.includes(path)){
+			var index = selectedAudio.indexOf(path);
+			if (index !== -1) selectedAudio.splice(index, 1);
 		}
-	});
+		// play(); Play not required - let it continue
+		plotPlaylistList();
+		return;
+ 	}
 
-	if(indexOfPath === -1){
+ 	// case 2
+ 	if(indexToBeDeleted < currentIndex){
+ 		currentIndex--;
+
+ 		if(selectedAudio.includes(path)){
+			var index = selectedAudio.indexOf(path);
+			if (index !== -1) selectedAudio.splice(index, 1);
+		}
+		play();
+		plotPlaylistList();
+		return;
+ 	}
+
+ 	// case 3
+ 	if(indexToBeDeleted === currentIndex){
+ 		if(selectedAudio.length === 1){
+ 			currentIndex = -1;
+
+ 			if(selectedAudio.includes(path)){
+				var index = selectedAudio.indexOf(path);
+				if (index !== -1) selectedAudio.splice(index, 1);
+			}
+
+ 			$("#divMediaPlayer").hide();
+ 			$("#audioMediaPlayer")[0].pause();
+ 			$("#audioMediaPlayer").html("");
+ 			plotPlaylistList();
+ 		} else {
+ 			// case a
+ 			if(currentIndex < (selectedAudio.length-1)){
+ 				if(selectedAudio.includes(path)){
+					var index = selectedAudio.indexOf(path);
+					if (index !== -1) selectedAudio.splice(index, 1);
+				}
+				play();
+				plotPlaylistList();
+				return;
+ 			}
+
+ 			// case b
+ 			if(selectedAudio.length === 1){
+ 				currentIndex = -1;
+
+ 				if(selectedAudio.includes(path)){
+					var index = selectedAudio.indexOf(path);
+					if (index !== -1) selectedAudio.splice(index, 1);
+				}
+				play();
+				plotPlaylistList();
+				return;
+ 			}
+
+ 			// case c
+ 			if(currentIndex === (selectedAudio.length-1)){
+ 				currentIndex--;
+
+ 				if(selectedAudio.includes(path)){
+					var index = selectedAudio.indexOf(path);
+					if (index !== -1) selectedAudio.splice(index, 1);
+				}
+				play();
+				plotPlaylistList();
+				return;
+ 			}
+ 		}
+ 	}
+ }
+
+
+
+var selectionFromPlaylistOfMediaPlayer = function(index, audioPath){
+	if(index === currentIndex){
+		// do nothing
 		return;
 	}
 
-	if(indexOfPath === currentIndex){
-		// one selected for deletion is playing currently
-		// so a switch to logically next track
-		// if last, then first, if n, then n+1
-		// if only one element in playlist that 
-		if(selectedAudio.length > 1){
-			if(currentIndex < selectedAudio.length){
-				currentIndex++;
-			}
-
-			if(currentIndex == selectedAudio.length) {
-				currentIndex = 0;
-			}
-		} else {
-			// redundant assignment for code readability
-			currentIndex = 0;
-
-			
-			$("#divMediaPlayer").hide();
-		}
-
-		$("#audioMediaPlayer")[0].pause();
-
-		var mediaHtml = "<source src=\""+ selectedAudio[currentIndex] + "\" type = \"audio/mp3\"> Your browser does not support the audio element.";
-
-		play();
-	}
-
-	if(selectedAudio.includes(path)){
-		var index = selectedAudio.indexOf(path);
-		if (index !== -1) selectedAudio.splice(index, 1);
-
-		plotPlaylistList();
-	}
-
-	if(selectedAudio.length == 0){
-		$("#divMediaPlayer").hide();
-	}
+	currentIndex = index;
+	play();
+	plotPlaylistList();
 }
 
 var plotPlaylistList = function() {
 	var innerHtml = "";
 
 	$(selectedAudio).each(function(index, element){
-
 		if(index == currentIndex) {
-			innerHtml += "<li class=\"list-group-item active\">" + element.split("/")[1] + "</li>";
+			innerHtml += "<li style=\"cursor:pointer;\" class=\"list-group-item active playlist\" audioIndex=\"" + index + "\" audio-path=\"" + element + "\">";
+		
+			innerHtml += element.split("/")[1] + "</li>";
 		} else {
-			innerHtml += "<li class=\"list-group-item\">" + element.split("/")[1] + "</li>";
+			innerHtml += "<li style=\"cursor:pointer;\" class=\"list-group-item playlist\" audioIndex=\"" + index + "\" audio-path=\"" + element + "\">";
+		
+			innerHtml += element.split("/")[1] + "</li>";
 		}
+
 	});
 
 	$("#lstPlaylist").html(innerHtml);
@@ -171,9 +234,22 @@ var reset = function(){
 
 }
 
+var attachHandlersForPlaylistItems = function() {
+	$(document).on("dblclick", "li.playlist", function(event) {
+		var index = $(event.target).attr("audioIndex");
+		var audioPath = $(event.target).attr("audio-path");
+
+		selectionFromPlaylistOfMediaPlayer(index,audioPath);
+		
+	});
+}
+
 $(document).ready(function(){
 	attachAddPlaylistHandlers();
 	attachRemoveFromPlaylistHandlers();
 	attachNextHandler();
 	attachPreviousHandler();
+	attachHandlersForPlaylistItems();
+
+	
 });

@@ -25,8 +25,14 @@ var addToPlaylist = function(path) {
 }
 
 var play = function(){
-	var audio = selectedAudio[currentIndex].split("/")[1];
-	$("#mediaPlayerMarquee").html("Playing: " + audio);
+
+	if(!selectedAudio || !selectedAudio[currentIndex] || selectedAudio[currentIndex].length === 0){
+		return;
+	} 
+
+	var lastIndexOfSlash = selectedAudio[currentIndex].lastIndexOf("/");
+	var audio = selectedAudio[currentIndex].substring(lastIndexOfSlash+1, selectedAudio[currentIndex].length);
+	addMarquee(audio);
 
 	var mediaHtml = "<source src=\""+ selectedAudio[currentIndex] + "\" type = \"audio/mp3\"> Your browser does not support the audio element.";
 
@@ -130,7 +136,7 @@ var play = function(){
 
 
 
-var selectionFromPlaylistOfMediaPlayer = function(index, audioPath){
+var selectionFromPlaylistOfMediaPlayer = function(index, audiourl){
 	if(index === currentIndex){
 		// do nothing
 		return;
@@ -141,23 +147,38 @@ var selectionFromPlaylistOfMediaPlayer = function(index, audioPath){
 	plotPlaylistList();
 }
 
+var removeFromPlaylistFromClose = function(event) {
+	var pathToRemove = $(event.target).parent().attr("audio-path");
+	removeFromPlaylist(pathToRemove);
+	return false;
+}
+
 var plotPlaylistList = function() {
 	var innerHtml = "";
 
 	$(selectedAudio).each(function(index, element){
+		// <span class="glyphicons glyphicons-remove-sign" style="float:right"></span>
+
+		var closeImgHTML = "<img class=\"playlist-item-close\" style=\"float:right;margin-right:10px;cursor:pointer;\" src=\"Images/close.png\" alt=\"Remove\" height=\"25\" width=\"25\"></img>";
+
 		if(index == currentIndex) {
 			innerHtml += "<li style=\"cursor:pointer;\" class=\"list-group-item active playlist\" audioIndex=\"" + index + "\" audio-path=\"" + element + "\">";
 		
-			innerHtml += element.split("/")[1] + "</li>";
+			var lastIndexOfSlash = element.lastIndexOf("/");
+
+			innerHtml += element.substring(lastIndexOfSlash+1, element.length) + closeImgHTML + "</li>";
 		} else {
 			innerHtml += "<li style=\"cursor:pointer;\" class=\"list-group-item playlist\" audioIndex=\"" + index + "\" audio-path=\"" + element + "\">";
 		
-			innerHtml += element.split("/")[1] + "</li>";
+			var lastIndexOfSlash = element.lastIndexOf("/");
+
+			innerHtml += element.substring(lastIndexOfSlash+1, element.length) + closeImgHTML + "</li>";
 		}
 
 	});
 
 	$("#lstPlaylist").html(innerHtml);
+	showPlaylistHandler(false);
 };
 
 // next
@@ -198,30 +219,44 @@ var prevHandler = function() {
 
 // handlers
 var attachAddPlaylistHandlers = function() {
-	$("button.addToPlaylist").click(function(event){
-		var path = $(event.target).attr("audioPath");
+	// clear
+	$("div.addToPlaylist").unbind("click");
+	// attach
+	$("div.addToPlaylist").click(function(event){
+		var path = $(event.target).attr("audiourl");
 		addToPlaylist(path);
 	});
 };
 
 
 var attachRemoveFromPlaylistHandlers = function(){
-	$("button.removeFromPlaylist").click(function(event){
-		var path = $(event.target).attr("audioPath");
+	// clear
+	$("div.removeFromPlaylist").unbind("click");
+	// attach
+	$("div.removeFromPlaylist").click(function(event){
+		var path = $(event.target).attr("audiourl");
 		removeFromPlaylist(path);
 	});
 };
 
 var attachNextHandler = function(){
+	// clear
+	$("#nextAnchor").unbind("click");
+	// attach
 	$("#nextAnchor").click(function(event){
 		nextHandler();
+		event.preventDefault();
 	});
 };
 
 
 var attachPreviousHandler = function(){
+	// clear
+	$("#prevAnchor").unbind("click");
+	// attach
 	$("#prevAnchor").click(function(event) {
 		prevHandler();
+		event.preventDefault();
 	})
 };
 
@@ -230,26 +265,107 @@ var reset = function(){
 	currentIndex = 0;
 	$("#audioMediaPlayer")[0].pause();
 	$("#divMediaPlayer").hide();
-	$("#mediaPlayerMarquee").html("");
+	$("#mediaPlayerSpan").html("");
 
 }
 
+var addMarquee = function(path) {
+	var audioControlWidth = $("#audioMediaPlayer").width();
+	var marqueeHtml = "<marquee class=\"playlistMarquee\" style=\"font-size:13px;max-width:" + audioControlWidth + "px;\">Playing: " + path + "</marquee>"
+	$("#mediaPlayerSpan").html(marqueeHtml);
+}
+
 var attachHandlersForPlaylistItems = function() {
+	// clear
+	$(document).unbind("dblclick", "li.playlist");
+	//attach
 	$(document).on("dblclick", "li.playlist", function(event) {
 		var index = $(event.target).attr("audioIndex");
-		var audioPath = $(event.target).attr("audio-path");
+		var audiourl = $(event.target).attr("audio-path");
 
-		selectionFromPlaylistOfMediaPlayer(index,audioPath);
+		selectionFromPlaylistOfMediaPlayer(index,audiourl);
 		
 	});
 }
 
-$(document).ready(function(){
+var mediaPlayerOnEndHandler = function(){
+	var playListLength = selectedAudio.length;
+
+	
+	currentIndex = (currentIndex+1)%(playListLength);
+	
+	play();
+	plotPlaylistList();
+		
+}
+
+var attachOnEndHandlerOnMediaPlayer = function(){
+	var mediaPlayer = document.getElementById("audioMediaPlayer");
+	mediaPlayer.onended = mediaPlayerOnEndHandler;
+}
+
+var showPlaylistHandler = function(toggle){
+	var currentState = $("#btnShowPlaylist").attr("state");
+
+	if(toggle){
+		switch(currentState){
+			case "on":
+				$("#lstPlaylist").hide();
+				$("#btnShowPlaylist").attr("state","off");
+				$("#btnShowPlaylist").html("Show playlist");
+			break;
+
+
+			case "off":
+				$("#lstPlaylist").show();
+				$("#btnShowPlaylist").attr("state","on");
+				$("#btnShowPlaylist").html("Hide playlist");
+			break;
+		}
+	} else {
+		switch(currentState){
+			case "off":
+				$("#lstPlaylist").hide();
+				$("#btnShowPlaylist").attr("state","off");
+				$("#btnShowPlaylist").html("Show playlist");
+			break;
+
+
+			case "on":
+				$("#lstPlaylist").show();
+				$("#btnShowPlaylist").attr("state","on");
+				$("#btnShowPlaylist").html("Hide playlist");
+			break;
+		}
+	}
+	$("html, body").animate({ scrollTop: $(document).height() }, 1000);
+}
+
+var attachShowPlaylistButtonHandler = function(){
+	// clear
+	$("#btnShowPlaylist").unbind("click");
+	// attach
+	$("#btnShowPlaylist").click(function(event){
+		showPlaylistHandler(true);
+		event.preventDefault();
+	});
+}
+
+$(document).on("click", ".playlist-item-close", function(event){
+		removeFromPlaylistFromClose(event);
+	});	
+
+$(document).on("content-loaded", function(event){
 	attachAddPlaylistHandlers();
 	attachRemoveFromPlaylistHandlers();
 	attachNextHandler();
 	attachPreviousHandler();
 	attachHandlersForPlaylistItems();
+	attachOnEndHandlerOnMediaPlayer();
+	attachShowPlaylistButtonHandler();
+});
 
-	
+$(document).ready(function(){
+	var contentLoadedEvent = new Event("content-loaded");
+	document.dispatchEvent(contentLoadedEvent);
 });

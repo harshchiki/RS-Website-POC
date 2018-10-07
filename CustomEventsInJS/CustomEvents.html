@@ -1,0 +1,27 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+	var createEvent = function(){
+		var event = new Event("customEvent");	
+		document.dispatchEvent(event);
+	}
+
+	var customEventHandler = function(event){
+		alert("customEvent fired & handled! " + event);
+	}
+
+	$(document).ready(function(){
+		createEvent();
+		
+	});
+
+	$(document).on("customEvent",function(event){
+		customEventHandler(event);
+	});
+</script>
+</head>
+<body>
+	<h1>Custom Events in JS</h1>
+</body>
+</html>

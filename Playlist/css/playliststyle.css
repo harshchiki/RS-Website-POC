@@ -1,8 +1,33 @@
 #divMediaPlayer {
-	width:50%;
+	width:100%;
 	max-height:30%;
+	font-size:12px;
+	color:#337ab7;
+}
+
+.playlistMarquee {
+
 }
 
 li.playlist.not(.active):hover {
 	background-color:#F3F3F3;
+}
+
+
+li.playlist {
+	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlistButton {
+	color:#337ab7;
+	min-width:100px;
+}
+
+.remove-playlist-item {
+	background:url(images/close.png) no-repeat top left;
+	display: inline-block;
+	height: 50px;
+	width: 50px;
 }

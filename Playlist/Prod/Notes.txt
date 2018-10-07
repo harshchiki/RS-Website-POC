@@ -1,0 +1,23 @@
+1.
+
+	Code added in siteFeatures.js
+	
+
+	var contentLoadedEvent = new Event("content-loaded");
+    document.dispatchEvent(contentLoadedEvent);
+
+
+    where: last line of the handler:
+
+    	$(document).ready(function ($) {
+		    $("h3").css("margin-top", "5px");
+
+
+		    var marginTop = $("#pageBanner").height() + $("#menuButtonContainer").height();
+		    $('a').each(function(index, value){
+		        var anchorTag = value;
+		        if(anchorTag.hasAttribute("targetDiv")) {
+		            $(anchorTag).click(function (event) {
+
+		            ...
+		            } ...

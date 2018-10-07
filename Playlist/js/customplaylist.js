@@ -7,6 +7,9 @@ var addToPlaylist = function(path) {
 	if(!selectedAudio.includes(path)){
 		selectedAudio.push(path);
 
+		var notificationMessage = "\"" + path.substring(path.lastIndexOf("/")+1, path.length) +"\" added!";
+		notify(notificationMessage, 'info');
+
 		// after inserting first element
 		if(selectedAudio.length == 1){
 			if(currentIndex == -1){
@@ -55,6 +58,10 @@ var play = function(){
  		}
  	});
 
+ 	if(indexToBeDeleted >= 0 && selectedAudio && selectedAudio[indexToBeDeleted]) {
+ 		var notificationMessage = "\"" + path.substring(path.lastIndexOf("/")+1, path.length) +"\" removed!";
+		notify(notificationMessage, 'warning'); 
+ 	}
  	// case 1
  	if(indexToBeDeleted > currentIndex){
  		if(selectedAudio.includes(path)){
@@ -92,7 +99,11 @@ var play = function(){
  			$("#divMediaPlayer").hide();
  			$("#audioMediaPlayer")[0].pause();
  			$("#audioMediaPlayer").html("");
- 			plotPlaylistList();
+			 plotPlaylistList();
+			 
+			 if($("a[targetdiv='Playlist'").parent().hasClass("active")){
+				$("#divEmptyPlaylist").show();
+			 }
  		} else {
  			// case a
  			if(currentIndex < (selectedAudio.length-1)){
@@ -338,7 +349,7 @@ var showPlaylistHandler = function(toggle){
 			break;
 		}
 	}
-	$("html, body").animate({ scrollTop: $(document).height() }, 1000);
+	//$("html, body").animate({ scrollTop: $(document).height() }, 1000);
 }
 
 var attachShowPlaylistButtonHandler = function(){
@@ -350,6 +361,8 @@ var attachShowPlaylistButtonHandler = function(){
 		event.preventDefault();
 	});
 }
+
+
 
 $(document).on("click", ".playlist-item-close", function(event){
 		removeFromPlaylistFromClose(event);
@@ -363,7 +376,40 @@ $(document).on("content-loaded", function(event){
 	attachHandlersForPlaylistItems();
 	attachOnEndHandlerOnMediaPlayer();
 	attachShowPlaylistButtonHandler();
+
+	$("a[targetdiv='Playlist'").click(function(){
+		if(!selectedAudio ||  selectedAudio.length === 0){
+			$("#divEmptyPlaylist").show();
+		} else {
+			$("#divEmptyPlaylist").hide();
+		}
+	});
 });
+
+var attachStopAllAudioAndPlayThis = function(){
+	$("audio").each(function(index, audioElement){
+		var audioPlayer = audioElement;
+		
+		audioPlayer.onplay = function(){
+			audioPlayer.pause();
+			$("audio").each(function(i,e){
+				$(e)[0].pause();
+				$(e)[0].currenTime = 0;
+			});
+			$(audioPlayer)[0].play();
+		};
+	});
+}
+
+var notify = function(message, type) {
+	$.notify({
+		// options
+		message: message 
+	},{
+		// settings
+		type: type
+	});
+}
 
 $(document).ready(function(){
 	var contentLoadedEvent = new Event("content-loaded");

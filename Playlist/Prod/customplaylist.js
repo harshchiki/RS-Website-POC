@@ -331,6 +331,7 @@ var showPlaylistHandler = function(toggle){
 				$("#lstPlaylist").show();
 				$("#btnShowPlaylist").attr("state","on");
 				$("#btnShowPlaylist").html("Hide playlist");
+				$("html, body").animate({ scrollTop: $(document).height() }, 1000);
 			break;
 		}
 	} else {
@@ -346,6 +347,7 @@ var showPlaylistHandler = function(toggle){
 				$("#lstPlaylist").show();
 				$("#btnShowPlaylist").attr("state","on");
 				$("#btnShowPlaylist").html("Hide playlist");
+				$("html, body").animate({ scrollTop: $(document).height() }, 1000);
 			break;
 		}
 	}
